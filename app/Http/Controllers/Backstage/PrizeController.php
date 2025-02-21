@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Backstage\Prizes\StoreRequest;
 use App\Http\Requests\Backstage\Prizes\UpdateRequest;
 use App\Models\Prize;
+use Illuminate\Filesystem\LocalFilesystemAdapter;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PrizeController extends Controller

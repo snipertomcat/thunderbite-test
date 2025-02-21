@@ -30,7 +30,7 @@ class CampaignsController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a ne                                                                                                                                                                                                                                               wly created resource in storage.
      */
     public function store(StoreRequest $request): RedirectResponse
     {
@@ -76,7 +76,6 @@ class CampaignsController extends Controller
 
         return redirect()->route('backstage.campaigns.index');
     }
-
 
     /**
      * Activate campaign

@@ -2,20 +2,24 @@
 
 namespace App\Models;
 
+use App\Enums\GameStatus;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
 
 class Game extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['campaign_id', 'prize_id', 'account', 'revealed_at'];
+    protected $fillable = ['campaign_id', 'prize_id', 'account','status', 'revealed_at'];
 
     protected function casts(): array
     {
         return [
-            'revealed_at' => 'datetime',
+            'revealed_at' => 'datetime'
         ];
     }
 
@@ -37,5 +41,94 @@ class Game extends Model
     public function prize(): BelongsTo
     {
         return $this->belongsTo(Prize::class);
+    }
+
+    public function moves(): HasMany
+    {
+        return $this->hasMany(Moves::class);
+    }
+
+    public function getStatusAttribute(): string
+    {
+        return GameStatus::from($this->attributes['status'])->name;
+    }
+
+    public static function startOrResumeGame($account, $campaignId): Game | array
+    {
+/*      $account = $request->query('a');
+        $segment = $request->query('segment');
+        $campaignId = $request->query('campaign');*/
+
+        $game = Game::where('account', $account)->where('status', GameStatus::IN_PROGRESS)->with('moves.prize')->first();
+
+        if (!$game) {
+            $game = Game::create([
+                'campaign_id' => $campaignId,
+                'account' => $account,
+                'status' => GameStatus::IN_PROGRESS,
+                'prize_id' => null,
+                'revealed_at' => Carbon::now()->toDateTimeString(),
+            ]);
+        }
+
+        if ($game->moves->isEmpty()) {
+            return [$game, []];
+        }
+
+        $moveHistory = $game->moves;
+        $revealedTiles = [];
+        //game is in progress, re-create board from history
+        foreach ($moveHistory as $move) {
+            $revealedTiles[] = [
+                'index' => $move->board_index,
+                'image' => $move->prize->getImage()
+            ];
+        }
+
+        session()->put('gameId', $game->id);
+
+        return [$game, $revealedTiles];
+        /*return response()->json([
+            'apiPath' => route('api.flip'),
+            'gameId' => $game->id,
+            'revealedTiles' => $game->tiles->map(fn($tile) => [
+                'index' => $tile->tile_index,
+                'image' => asset($tile->prize->image),
+            ]),
+            'message' => null
+        ]);*/
+    }
+
+
+    public static function loadOrCreate(int $campaignId, string $account): Game
+    {
+        return Game::where('account', $account)
+            ->where('status', GameStatus::IN_PROGRESS)
+            ->firstOrCreate([
+                'account' => $account,
+                'campaign_id' => $campaignId,
+                'prize_id' => null,
+                'status' => GameStatus::IN_PROGRESS,
+            ]);
+    }
+
+    public function checkAndUpdateGamePrize(): void
+    {
+        $prizeWonCheck = Moves::selectRaw('prize_id')
+            ->where('game_id', $this->id)
+            ->groupBy('prize_id')
+            ->havingRaw("count(*) > 2")
+            ->pluck('prize_id')
+            ->first();
+
+        if ($prizeWonCheck) {
+            //update the associated game's prize_id
+            $this->update([
+                'prize_id' => $prizeWonCheck,
+                'status' => GameStatus::FINISHED_WON,
+                'revealed_at' => Carbon::now()->toDateTimeString(),
+            ]);
+            $this->save();
+        }
     }
 }

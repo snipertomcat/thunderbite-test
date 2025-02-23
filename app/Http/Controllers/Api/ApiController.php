@@ -6,10 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Game;
 use App\Models\Moves;
 use App\Models\Prize;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Storage;
 
 class ApiController extends Controller
 {
@@ -34,6 +30,7 @@ class ApiController extends Controller
         $prize = Prize::selectPrizeFromSegment($segment, $campaignId);
 
         $tileImage = $prize->getImage();
+
         if ($game->prize_id !== null) {
             $message = "Game Over: YOU WON!";
             return json_encode([
@@ -41,25 +38,25 @@ class ApiController extends Controller
             ]);
         } else {
             $lastTurn = (int)Moves::getLastTurn($gameId);
-            $turn = $lastTurn++;
 
-            $currentMove = Moves::create([
+            if (!$lastTurn) {
+                $lastTurn = 1;
+            } else {
+                $lastTurn++;
+            }
+
+            if ($lastTurn >= 10) {
+                $message = "Game Over: YOU LOST!";
+            }
+
+            Moves::create([
                 'game_id' => $gameId,
                 'board_index' => $tileIndex,
                 'prize_id' => $prize->id,
-                'turn' => $turn,
+                'turn' => $lastTurn,
             ]);
-
-            $game = Game::find($gameId);
-            if ($game->prize_id !== null) {
-                $message = "Game Over: YOU WON!";
-            }
-
-            if ($turn >= 10) {
-                $message = "Game Over: YOU LOST!";
-            }
         }
-        // Return the next tile and a loss message if the move limit is exceeded.
+
         return json_encode([
             'tileImage' => $tileImage,
             'message' => $message ?? "",

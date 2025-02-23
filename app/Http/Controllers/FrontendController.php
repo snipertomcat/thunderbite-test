@@ -23,6 +23,7 @@ class FrontendController extends Controller
 
     /**
      * @throws \JsonException
+     * @throws CampaignNotValidException
      */
     public function loadCampaign(Campaign $campaign): View
     {
@@ -32,16 +33,6 @@ class FrontendController extends Controller
         $now = Carbon::now();
         $message = "";
 
-        if ($now->gt($endTime)) {
-            $message = GameResultMessage::CAMPAIGN_ENDED;
-        } elseif ($now->lt($startTime)) {
-            $message = GameResultMessage::CAMPAIGN_NOT_STARTED;
-        }
-
-        if ($message) {
-            throw new CampaignNotValidException($message);
-        }
-
         $account = request()->get('a');
         $segment = request()->get('segment');
 
@@ -49,9 +40,22 @@ class FrontendController extends Controller
         [$loadedGame, $revealedTiles] = Game::startOrResumeGame($account, $campaign->id);
 
         if (!is_null($revealedTiles)) {
-
             $gameId = $loadedGame->id;
             $moveHistory = $loadedGame->moves;
+        }
+
+        if ($now->gt($endTime)) {
+            $message = GameResultMessage::CAMPAIGN_ENDED;
+            $loadedGame->status = GameStatus::FINISHED_EXPIRED;
+        } elseif ($now->lt($startTime)) {
+            $message = GameResultMessage::CAMPAIGN_NOT_STARTED;
+            $loadedGame->status = GameStatus::FINISHED_NOT_STARTED;
+        }
+
+        $loadedGame->save();
+
+        if ($message) {
+            throw new CampaignNotValidException($message);
         }
 
         $jsonConfig = json_encode([

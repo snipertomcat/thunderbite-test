@@ -88,15 +88,6 @@ class Game extends Model
         session()->put('gameId', $game->id);
 
         return [$game, $revealedTiles];
-        /*return response()->json([
-            'apiPath' => route('api.flip'),
-            'gameId' => $game->id,
-            'revealedTiles' => $game->tiles->map(fn($tile) => [
-                'index' => $tile->tile_index,
-                'image' => asset($tile->prize->image),
-            ]),
-            'message' => null
-        ]);*/
     }
 
 
@@ -128,6 +119,7 @@ class Game extends Model
                 'status' => GameStatus::FINISHED_WON,
                 'revealed_at' => Carbon::now()->toDateTimeString(),
             ]);
+
             $this->save();
         }
     }

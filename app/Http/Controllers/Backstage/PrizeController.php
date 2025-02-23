@@ -39,7 +39,10 @@ class PrizeController extends Controller
         // Create the prize with validated data
         $data = $request->validated();
         $data['campaign_id'] = session('activeCampaign');
-
+        $originalExtension = $request->file('image_path')->getClientOriginalExtension();
+        $originalFilename = $request->file('image_path')->getClientOriginalName();
+        $path = $request->file('image_path')->storeAs(asset('storage/' . $originalFilename . "." . $originalExtension));
+        $data['image_path'] = $path;
         Prize::create($data);
 
         session()->flash('success', 'The prize has been created!');

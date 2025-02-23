@@ -23,6 +23,7 @@ class StoreRequest extends FormRequest
             'name' => 'required|max:255',
             'description' => 'sometimes',
             'weight' => 'required|numeric|between:0.01,99.99',
+            'image_path' => 'nullable|file|max:2048|mimes:jpg,png,pdf',
             'starts_at' => 'required|date_format:d-m-Y H:i:s',
             'ends_at' => 'required|date_format:d-m-Y H:i:s',
             'segment' => 'required|in:low,med,high',

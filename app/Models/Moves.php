@@ -26,12 +26,7 @@ class Moves extends Model
 
     public static function getLastTurn($gameId)
     {
-        $turn = Moves::query()->where('game_id', $gameId)->max('turn');
-        if ($turn === 0) {
-            return 1;
-        } else {
-            return $turn;
-        }
+        return Moves::query()->where('game_id', $gameId)->max('turn');
     }
 
     public function game()
@@ -43,6 +38,4 @@ class Moves extends Model
     {
         return $this->belongsTo(Prize::class);
     }
-
-
 }

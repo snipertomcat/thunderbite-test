@@ -53,6 +53,10 @@ class Prize extends Model
 
     public function getImage()
     {
-        return asset('storage/' . $this->image_path . '.png');
+        if (in_array($this->image_path, [1,2,3,4,5,6,7])) {
+            return asset('storage/' . $this->image_path . ".png");
+        }
+
+        return asset('storage/' . $this->image_path);
     }
 }

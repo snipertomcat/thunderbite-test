@@ -23,6 +23,7 @@ class ApiController extends Controller
 
         $gameId = request('gameId');
         $game = Game::findOrFail($gameId);
+        $game->checkAndUpdateGamePrize();
         $tileIndex = request('tileIndex');
         $campaignId = request('campaign');
         $segment = request('segment');
@@ -31,20 +32,20 @@ class ApiController extends Controller
 
         $tileImage = $prize->getImage();
 
+        $lastTurn = (int)Moves::getLastTurn($gameId);
+
+        if (!$lastTurn) {
+            $lastTurn = 1;
+        } else {
+            $lastTurn++;
+        }
+
         if ($game->prize_id !== null) {
             $message = "Game Over: YOU WON!";
             return json_encode([
                 'message' => $message,
             ]);
         } else {
-            $lastTurn = (int)Moves::getLastTurn($gameId);
-
-            if (!$lastTurn) {
-                $lastTurn = 1;
-            } else {
-                $lastTurn++;
-            }
-
             if ($lastTurn >= 10) {
                 $message = "Game Over: YOU LOST!";
             }

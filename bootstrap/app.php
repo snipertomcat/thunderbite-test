@@ -25,6 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'setActiveCampaign' => \App\Http\Middleware\SetActiveCampaign::class,
         ]);
     })
+    ->withMiddleware(function(Middleware $middleware) {
+        $middleware->prepend(\App\Http\Middleware\CheckGameWin::class);
+    })
     ->withExceptions(function (Exceptions $exceptions) {
 
     })->create();

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Backstage\GameController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/flip', [ApiController::class, 'flip'])->name('api.flip');
+Route::get('/start', [GameController::class, 'startOrResumeGame'])->name('game.start');

@@ -14,8 +14,9 @@ class GameTable extends TableComponent
 
     public $account = null;
 
-    public $startDate = null;
-
+    public $status = null;
+    public $createdAt = null;
+    public $updatedAt = null;
     public $endDate = null;
 
     public function export() {}
@@ -27,15 +28,19 @@ class GameTable extends TableComponent
                 'title' => 'account',
                 'sort' => true,
             ],
-
             [
-                'title' => 'prize_id', // please update this, that it would show prize name instead
-                'attribute' => 'prize_id',
+                'title' => 'Prize Name',
+                'attribute' => 'prizeName',
                 'sort' => true,
             ],
-
             [
-                'title' => 'revealed at',
+                'title' => 'Status',
+                'attribute' => 'status',
+                'sort' => true,
+                ''
+            ],
+            [
+                'title' => 'Revealed At',
                 'attribute' => 'revealed_at',
                 'sort' => true,
             ],
@@ -44,7 +49,7 @@ class GameTable extends TableComponent
         return view('livewire.backstage.table', [
             'columns' => $columns,
             'resource' => 'games',
-            'rows' => Game::filter()
+            'rows' => Game::selectRaw('*, prizes.name as prizeName')
                 ->join('prizes', 'prizes.id', '=', 'games.prize_id')
                 ->where('prizes.campaign_id', session('activeCampaign'))
                 ->orderBy($this->sortField, $this->sortDesc ? 'DESC' : 'ASC')

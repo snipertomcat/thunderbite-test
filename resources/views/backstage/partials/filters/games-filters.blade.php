@@ -3,9 +3,9 @@
            class="h-10 border border-gray-300 rounded-lg mr-4">
     <input wire:loading.attr="disabled" type="number" id="wire-account" wire:model.live="prizeId" placeholder=" Prize ID"
            class="h-10 border border-gray-300 rounded-lg mr-4">
-    <input wire:loading.attr="disabled" type="text" wire:model.live="startDate" id="wire-starts" placeholder=" Start Date"
+    <input wire:loading.attr="disabled" type="text" wire:model.live="updated_at" id="wire-starts" placeholder=" Updated At"
            class="h-10 border border-gray-300 rounded-lg mr-4">
-    <input type="text" wire:model.live="endDate" id="wire-ends" placeholder=" End Date"
+    <input type="text" wire:model.live="created_at" id="wire-ends" placeholder=" Created At"
            class="h-10 border border-gray-300 rounded-lg mr-4">
 
     <button wire:click="$dispatch('cleanAll')" class="h-10 bg-white hover:bg-gray-100 text-gray-800
@@ -19,8 +19,8 @@
         Livewire.on('cleanAll', function () {
         @this.set('account', '');
         @this.set('prizeId', '');
-        @this.set('startDate', '');
-        @this.set('endDate', '');
+        @this.set('updatedAt', '');
+        @this.set('createdAt', '');
         });
 
         flatpickr("#wire-starts", {

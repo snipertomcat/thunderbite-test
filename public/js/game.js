@@ -560,7 +560,7 @@ class MainComponent extends Component {
             this._interactive = false;
             const response = yield request("POST", this._config.apiPath, { gameId: this._config.gameId, tileIndex: index });
             this._tiles[index].setImage(response.tileImage);
-            if (response.message) {
+            if (response.message) {3
                 this.refs.popup.setMessage(response.message);
                 this.refs.popup.show(true);
             }
@@ -570,6 +570,7 @@ class MainComponent extends Component {
         });
     }
     onAttach() {
+        console.log(this._config.reveledTiles)
         if (this._config.reveledTiles) {
             this._config.reveledTiles.forEach(x => this._tiles[x.index].setImage(x.image));
         }

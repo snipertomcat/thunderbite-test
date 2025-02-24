@@ -23,6 +23,17 @@ class ApiController extends Controller
 
         $gameId = request('gameId');
         $game = Game::findOrFail($gameId);
+
+        $game->checkAndUpdateGamePrize();
+
+        if ($game->prize_id !== null) {
+            $message = "Game Over: YOU WON!";
+            return json_encode([
+                'message' => $message,
+                'tileImage' => Prize::find($game->prize_id)->getImage(),
+            ]);
+        }
+
         $tileIndex = request('tileIndex');
         $campaignId = request('campaign');
         $segment = request('segment');
@@ -31,41 +42,29 @@ class ApiController extends Controller
 
         $tileImage = $prize->getImage();
 
-
-        $lastMoves = Moves::getLastTurn($gameId);
-        $lastTurn = $lastMoves->max('turn');
-
-        if ($lastTurn == 0) {
-            $lastTurn = 1;
-        } else {
-            $lastTurn = $lastTurn++;
-        }
+        $lastTurn = session()->get('turn');
 
         if ($lastTurn >= 10) {
             $message = "Game Over: YOU LOST!";
         }
+
+        session()->increment('turn');
+
+        Moves::create([
+            'game_id' => $gameId,
+            'board_index' => $tileIndex,
+            'prize_id' => $prize->id,
+        ]);
 
         $game->checkAndUpdateGamePrize();
 
         if ($game->prize_id !== null) {
             $message = "Game Over: YOU WON!";
             return json_encode([
+                'tileImage' => $tileImage,
                 'message' => $message,
             ]);
         }
-
-        Moves::create([
-            'game_id' => $gameId,
-            'board_index' => $tileIndex,
-            'prize_id' => $prize->id,
-            'turn' => $lastTurn,
-        ]);
-
-        $game = Game::find($gameId);
-        if ($game->prize_id !== null) {
-            $message = "Game Over: YOU WON!";
-        }
-
 
         return json_encode([
             'tileImage' => $tileImage,

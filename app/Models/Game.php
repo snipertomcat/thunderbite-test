@@ -8,18 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Http\Request;
 
 class Game extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['campaign_id', 'prize_id', 'account','status', 'revealed_at'];
-
-    public static function booted()
-    {
-
-    }
+    protected $fillable = ['campaign_id', 'prize_id', 'account', 'status', 'revealed_at'];
 
     protected function casts(): array
     {
@@ -58,13 +52,10 @@ class Game extends Model
         return GameStatus::from($this->attributes['status'])->name;
     }
 
-    public static function startOrResumeGame($account, $campaignId): Game | array
+    public static function startOrResumeGame($account, $campaignId): Game|array
     {
-/*      $account = $request->query('a');
-        $segment = $request->query('segment');
-        $campaignId = $request->query('campaign');*/
-
         $game = Game::where('account', $account)->where('status', GameStatus::IN_PROGRESS)->with('moves.prize')->first();
+        $campaign = Campaign::find($campaignId);
 
         if (!$game) {
             $game = Game::create([
@@ -72,7 +63,7 @@ class Game extends Model
                 'account' => $account,
                 'status' => GameStatus::IN_PROGRESS,
                 'prize_id' => null,
-                'revealed_at' => Carbon::now()->toDateTimeString(),
+                'revealed_at' => Carbon::now()->tz($campaign->timezone)->toDateTimeString(),
             ]);
         }
 
@@ -95,25 +86,13 @@ class Game extends Model
         return [$game, $revealedTiles];
     }
 
-
-    public static function loadOrCreate(int $campaignId, string $account): Game
-    {
-        return Game::where('account', $account)
-            ->where('status', GameStatus::IN_PROGRESS)
-            ->firstOrCreate([
-                'account' => $account,
-                'campaign_id' => $campaignId,
-                'prize_id' => null,
-                'status' => GameStatus::IN_PROGRESS,
-            ]);
-    }
-
     public function checkAndUpdateGamePrize(): void
     {
+        $timezone = $this->campaign->timezone;
         $prizeWonCheck = Moves::selectRaw('prize_id')
             ->where('game_id', $this->id)
             ->groupBy('prize_id')
-            ->havingRaw("count(*) >= 3")
+            ->havingRaw("count(*) > 2")
             ->pluck('prize_id')
             ->first();
 
@@ -122,9 +101,8 @@ class Game extends Model
             $this->update([
                 'prize_id' => $prizeWonCheck,
                 'status' => GameStatus::FINISHED_WON,
-                'revealed_at' => Carbon::now()->toDateTimeString(),
+                'revealed_at' => Carbon::now()->tz($timezone)->toDateTimeString(),
             ]);
-
             $this->save();
         }
     }

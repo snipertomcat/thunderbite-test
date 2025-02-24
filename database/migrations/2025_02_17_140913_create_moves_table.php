@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('games_history', function (Blueprint $table) {
+        Schema::create('moves', function (Blueprint $table) {
             $table->id();
             $table->foreignId('game_id')->constrained('games', 'id');
             $table->integer('board_index')->unsigned();
             $table->string('tileImage');
-            $table->integer('turn')->unsigned();
             $table->timestamps();
         });
     }

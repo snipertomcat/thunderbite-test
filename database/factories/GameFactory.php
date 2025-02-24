@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\GameStatus;
 use App\Models\Campaign;
 use App\Models\Prize;
 use Exception;
@@ -27,6 +28,7 @@ class GameFactory extends Factory
             'prize_id' => Prize::where('campaign_id', $campaign->id)->inRandomOrder()->first()->id,
             'account' => $this->faker->userName(),
             'revealed_at' => now()->subDays(random_int(1, 10)),
+            'status' => GameStatus::FINISHED_WON,
         ];
     }
 }

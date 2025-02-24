@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Exceptions\NoTurnsLeftException;
 use Illuminate\Database\Eloquent\Model;
 
 class Moves extends Model
@@ -23,11 +22,6 @@ class Moves extends Model
             $game->checkAndUpdateGamePrize();
         });
 
-    }
-
-    public static function getLastTurn($gameId)
-    {
-        return Moves::query()->where('game_id', $gameId)->get();
     }
 
     public function game()

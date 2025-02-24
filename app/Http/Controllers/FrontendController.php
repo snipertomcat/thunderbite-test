@@ -27,7 +27,12 @@ class FrontendController extends Controller
      */
     public function loadCampaign(Campaign $campaign): View
     {
+        session()->remove('turn');
         session()->put('activeCampaign', $campaign->id);
+        if (!session()->has('turn')) {
+            session()->put('turn',1);
+        }
+
         $startTime = $campaign->starts_at;
         $endTime = $campaign->ends_at;
         $now = Carbon::now();
@@ -60,7 +65,7 @@ class FrontendController extends Controller
         $jsonConfig = json_encode([
             'apiPath' => "/api/flip?segment={$segment}&campaign={$campaign->id}&a={$account}",
             'gameId'  => $gameId,
-            'reveledTiles' => $revealedTiles, // Restore clicked tiles for an ongoing game
+            'revealedTiles' => $revealedTiles, // Restore clicked tiles for an ongoing game
             'message' => $message, // Popup message when the game changes statuses
             'segment' => $segment,
         ]);

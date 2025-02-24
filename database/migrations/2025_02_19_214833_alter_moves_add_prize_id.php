@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         Schema::table('moves', function (Blueprint $table): void {
-            $table->foreignId('prize_id')->after('turn')->constrained('prizes', 'id');
+            $table->foreignId('prize_id')->after('game_id')->constrained('prizes', 'id');
             $table->dropColumn('tileImage');
         });
         Schema::enableForeignKeyConstraints();

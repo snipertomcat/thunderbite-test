@@ -5,11 +5,12 @@ namespace Database\Factories;
 use App\Enums\GameStatus;
 use App\Models\Campaign;
 use App\Models\Prize;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Game>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory
  */
 class GameFactory extends Factory
 {
@@ -21,14 +22,14 @@ class GameFactory extends Factory
      */
     public function definition(): array
     {
-        $campaign = Campaign::inRandomOrder()->first();
+        $campaignId = 1;
 
         return [
-            'campaign_id' => $campaign->id,
-            'prize_id' => Prize::where('campaign_id', $campaign->id)->inRandomOrder()->first()->id,
-            'account' => $this->faker->userName(),
-            'revealed_at' => now()->subDays(random_int(1, 10)),
-            'status' => GameStatus::FINISHED_WON,
+            'campaign_id' => 1,
+            'prize_id' => null,
+            'account' => 'test',
+            'revealed_at' => Carbon::now()->toDateTimeString(),
+            'status' => 1,
         ];
     }
 }

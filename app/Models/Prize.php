@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 
 class Prize extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'campaign_id',
         'name',
@@ -39,10 +43,16 @@ class Prize extends Model
 
     public static function selectPrizeFromSegment(string $segment, int $campaignId): Prize
     {
+        if (App::environment() !== "testing") {
+            $orderByRaw = "-LOG(1.0 - RAND()) / weight";
+        } else {
+            $orderByRaw = "-LOG(1.0 - RANDOM()) / weight";
+        }
+
         return  Prize::select('*')
             ->where('segment', $segment)
             ->where('campaign_id', $campaignId)
-            ->orderByRaw('-LOG(1.0 - RAND()) / weight')
+            ->orderByRaw($orderByRaw)
             ->first();
     }
 

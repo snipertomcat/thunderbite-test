@@ -22,6 +22,19 @@ class Game extends Model
         ];
     }
 
+    public static function boot(): void
+    {
+        static::updating(function (Game $game) {
+            $campaignId = session('activeCampaign');
+            $campaign = Campaign::find($campaignId);
+
+            if (!empty($game->prize_id)) {
+                $game->revealedAt = Carbon::tz($campaign->timezone)->now()->toDateTimeString();
+                $game->save();
+            }
+        });
+    }
+
     public static function filter(?string $account = null, ?int $prizeId = null, ?string $fromDate = null, ?string $tillDate = null)
     {
         $query = self::query();
@@ -63,7 +76,7 @@ class Game extends Model
                 'account' => $account,
                 'status' => GameStatus::IN_PROGRESS,
                 'prize_id' => null,
-                'revealed_at' => Carbon::now()->tz($campaign->timezone)->toDateTimeString(),
+                'revealed_at' => null,
             ]);
         }
 
@@ -88,15 +101,15 @@ class Game extends Model
 
     public function checkAndUpdateGamePrize(): void
     {
-        $timezone = $this->campaign->timezone;
         $prizeWonCheck = Moves::selectRaw('prize_id')
             ->where('game_id', $this->id)
-            ->groupBy('prize_id')
+            ->groupBy('moves.prize_id')
             ->havingRaw("count(*) > 2")
             ->pluck('prize_id')
             ->first();
 
         if ($prizeWonCheck) {
+            $timezone = $this->campaign->timezone;
             //update the associated game's prize_id
             $this->update([
                 'prize_id' => $prizeWonCheck,

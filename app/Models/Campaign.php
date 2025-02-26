@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use DateTimeZone;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
 class Campaign extends Model
 {
-    use HasSlug;
+    use HasSlug, HasFactory;
 
     /**
      * The attributes that are mass assignable.

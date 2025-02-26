@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Game;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,9 +17,9 @@ return new class extends Migration
         });
 
         //set the previous games to have status FINISHED_WON
-        $games = \App\Models\Game::get();
+        $games = \App\Models\Game::all();
         foreach ($games as $game) {
-            $game->status = \App\Enums\GameStatus::FINISHED_WON;
+            $game->status = 2;
             $game->save();
         }
     }
